@@ -4,7 +4,7 @@ import speech_recognition as sr
 import pyaudio
 import wikipedia
 import webbrowser
-
+import os
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -26,11 +26,11 @@ def wishMe():
         speak("Good Afternoon Sir!")
     else :
         speak("Good Evening Sir!")
-    speak("I am Jarvis.Your personal Assistant.Please tell me how may I help you?")
+    speak("I am Jarvis. Your personal Assistant. Please tell me how may I help you?")
 
 def takeCommand():
     '''
-    This function takes command from the user>>>
+    This function takes command from the user>>> 
     '''
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -71,3 +71,18 @@ if __name__ == "__main__":
             print("\n")
             speak('Opening Google')
             webbrowser.open("google.com")
+        
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
+            print(f"Sir, the time is {strTime}")    
+            speak(f"Sir, the time is {strTime}")   
+
+        elif 'open audacity' in query:
+            audPath = "C:\\Program Files\\Audacity\\Audacity.exe"
+            os.startfile(audPath)
+        
+        elif 'bye' in query:
+            speak("Goodbye Sir. Have a nice day. Always at your service sir.")
+            speak('Turning Off. Into sleep mode.')  
+            break
+        
