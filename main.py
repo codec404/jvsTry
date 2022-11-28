@@ -5,6 +5,7 @@ import pyaudio
 import wikipedia
 import webbrowser
 import os
+import requests
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -45,22 +46,61 @@ def takeCommand():
         return "None"
     return query
 
+def kelvinToCelsiusFahrenheit(kelvin):
+    celsius = kelvin -273.15
+    fahrenheit = celsius * (9/5) + 32
+    return celsius,fahrenheit
+
+def weather():
+    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+    api_key = os.environ['CurrentWeather']
+    city = "Memari"
+    url = base_url+"appid="+api_key+"&q="+city
+
+    response = requests.get(url).json()
+    temp_kelvin = response['main']['temp']
+    temp_celsius,temp_fahrenheit = kelvinToCelsiusFahrenheit(temp_kelvin)
+    feelsLikeKelvin = response['main']['feels_like']
+    feels_like_celsius,feels_like_fahrenheit = kelvinToCelsiusFahrenheit(temp_kelvin)
+    wind_speed = response['wind']['speed']
+    humidity = response['main']['humidity']
+    description = response['weather'][0]['description']
+    sunrise_time = datetime.datetime.utcfromtimestamp(response['sys']['sunrise']+response['timezone'])
+    sunset_time = datetime.datetime.utcfromtimestamp(response['sys']['sunset']+response['timezone'])
+    tempInt = int(temp_celsius)
+    feelsInt = int(feels_like_celsius)
+    print(f"City: {city}")
+    print(f"Temperature in Celsius: {temp_celsius}")
+    print(f"Feels Like : {feels_like_celsius}")
+    print(f"Wind Speed : {wind_speed}")
+    print(f"{description}")
+    print(f"Humidity : {humidity}")
+    print(f"Sunrise : {sunrise_time}")
+    print(f"Sunset : {sunset_time}")
+    speak(f"Temperature is {tempInt} degree Celsius")
+    speak(f"Feels like {feelsInt} degree Celsius")
+    speak(f"With {humidity}percent humidity")
+    speak("Rest data is presnted on your screen sir. Thank you Sir.")
 
 if __name__ == "__main__":
+    flag = 1
+    joke = 1
     while True:
-        flag = 0
         get = sr.Recognizer()
         instruct = ""
         with sr.Microphone() as source:
             audio = get.listen(source)
         try:
-            # print("Recognizing...")
+            print("...")
             instruct = get.recognize_google(audio, language='en-in')
             # print(f"User said : {instruct}\n")
         except Exception as e:
             pass
         if 'hello jarvis' in instruct.lower() :
-            wishMe()
+            if flag==1 :
+                wishMe()
+            else :
+                speak("Coming back from sleep mode. Hello Sir. How may I help you")
             while True:
                 query = takeCommand().lower()
 
@@ -117,6 +157,7 @@ if __name__ == "__main__":
                 elif 'bye' in query:
                     speak("Goodbye Sir. Have a nice day. Always at your service sir.")
                     speak('Turning Off. Into sleep mode.')  
+                    flag = 0
                     break
 
                 elif 'open whatsapp' in query:
@@ -127,8 +168,32 @@ if __name__ == "__main__":
                     speak("Opening Google Meet")
                     webbrowser.open("meet.google.com")
 
+                elif 'open spotify' in query :
+                    speak("Opening Spotify Sir")
+                    webbrowser.open("spotify.com") 
+
+                elif 'tell me a joke' in query :
+                    speak("Ok Sir searching in my library.")
+                    if joke==1:
+                        speak("Why is cricket stadium so cool? Because every seat has a fan in it.")
+                    elif joke==2:
+                        speak("Why don't some couples go to the gym?  Becasuse some relationships don't work out.")
+                    else:
+                        speak("I am running out of jokes sir. Can you consult me later as I will return turning into a joker")
+                    joke +=1
+
+                elif 'who am i' in query:
+                    speak("You are my Master Sir. Everybody calls you Saptarshi.")
+                
+                elif 'what is my name' in query:
+                    speak("You are very famous amongst people as Jojo. But to me you are my master sir.")
+
+                elif 'weather' in query :
+                    speak("Showing you live weather updates Sir")
+                    weather()
+                    
                 elif 'shutdown' in query:
-                    speak("Shutting Down Service")
+                    speak("Shutting Down Service. Remember me when required. Adios")
                     exit(0)
         else:
             continue
