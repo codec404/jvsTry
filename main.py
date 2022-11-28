@@ -6,6 +6,9 @@ import wikipedia
 import webbrowser
 import os
 import requests
+from geopy.geocoders import Nominatim
+import pywhatkit
+import time
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -50,13 +53,17 @@ def kelvinToCelsiusFahrenheit(kelvin):
     celsius = kelvin -273.15
     fahrenheit = celsius * (9/5) + 32
     return celsius,fahrenheit
+def location():
+    response = requests.get("https://ipinfo.io/json")
+    geoGet = response.json()
+    lat = geoGet['loc'][:7]
+    lon = geoGet['loc'][8:]
+    return lat,lon
 
-def weather():
+def weather(lat , lon):
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
     api_key = os.environ['CurrentWeather']
-    city = "Memari"
-    url = base_url+"appid="+api_key+"&q="+city
-
+    url = base_url+"lat="+lat+"&lon="+lon+"&appid="+api_key
     response = requests.get(url).json()
     temp_kelvin = response['main']['temp']
     temp_celsius,temp_fahrenheit = kelvinToCelsiusFahrenheit(temp_kelvin)
@@ -69,7 +76,10 @@ def weather():
     sunset_time = datetime.datetime.utcfromtimestamp(response['sys']['sunset']+response['timezone'])
     tempInt = int(temp_celsius)
     feelsInt = int(feels_like_celsius)
-    print(f"City: {city}")
+    geolocator = Nominatim(user_agent="geoapiExercises")
+    getLocation = geolocator.geocode(lat+","+lon)
+    print(f"Location:{getLocation}")
+    print(f"Latitude: {lat}       Longitude: {lon}")
     print(f"Temperature in Celsius: {temp_celsius}")
     print(f"Feels Like : {feels_like_celsius}")
     print(f"Wind Speed : {wind_speed}")
@@ -80,6 +90,7 @@ def weather():
     speak(f"Temperature is {tempInt} degree Celsius")
     speak(f"Feels like {feelsInt} degree Celsius")
     speak(f"With {humidity}percent humidity")
+    speak(f"And a windspeed of {wind_speed} kilometers per hour")
     speak("Rest data is presnted on your screen sir. Thank you Sir.")
 
 if __name__ == "__main__":
@@ -151,8 +162,12 @@ if __name__ == "__main__":
                     speak("Opening Gmail")
                     webbrowser.open("mail.google.com")
                 
-                elif 'play music' in query:
-                    webbrowser.open("music.youtube.com")            
+                elif 'open youtube music' in query:
+                    webbrowser.open("music.youtube.com")
+
+                elif 'play' in query :
+                    clip = query.replace('play','')
+                    pywhatkit.playonyt(clip)  
                 
                 elif 'bye' in query:
                     speak("Goodbye Sir. Have a nice day. Always at your service sir.")
@@ -190,7 +205,13 @@ if __name__ == "__main__":
 
                 elif 'weather' in query :
                     speak("Showing you live weather updates Sir")
-                    weather()
+                    latitude,longitude = location()
+                    weather(latitude,longitude)
+                
+                elif 'open code' in query :
+                    speak("Opening VS Code by default")
+                    codePath = "C:\\Users\\sapta\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+                    os.startfile(codePath)
                     
                 elif 'shutdown' in query:
                     speak("Shutting Down Service. Remember me when required. Adios")
