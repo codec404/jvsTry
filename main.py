@@ -9,6 +9,7 @@ import requests
 from geopy.geocoders import Nominatim
 import pywhatkit
 import time
+from location import lat,lon
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -53,17 +54,11 @@ def kelvinToCelsiusFahrenheit(kelvin):
     celsius = kelvin -273.15
     fahrenheit = celsius * (9/5) + 32
     return celsius,fahrenheit
-def location():
-    response = requests.get("https://ipinfo.io/json")
-    geoGet = response.json()
-    lat = geoGet['loc'][:7]
-    lon = geoGet['loc'][8:]
-    return lat,lon
 
-def weather(lat , lon):
+def weather(latitude , longitude):
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
     api_key = os.environ['CurrentWeather']
-    url = base_url+"lat="+lat+"&lon="+lon+"&appid="+api_key
+    url = base_url+"lat="+latitude+"&lon="+longitude+"&appid="+api_key
     response = requests.get(url).json()
     temp_kelvin = response['main']['temp']
     temp_celsius,temp_fahrenheit = kelvinToCelsiusFahrenheit(temp_kelvin)
@@ -76,22 +71,27 @@ def weather(lat , lon):
     sunset_time = datetime.datetime.utcfromtimestamp(response['sys']['sunset']+response['timezone'])
     tempInt = int(temp_celsius)
     feelsInt = int(feels_like_celsius)
-    geolocator = Nominatim(user_agent="geoapiExercises")
-    getLocation = geolocator.geocode(lat+","+lon)
-    print(f"Location:{getLocation}")
-    print(f"Latitude: {lat}       Longitude: {lon}")
-    print(f"Temperature in Celsius: {temp_celsius}")
-    print(f"Feels Like : {feels_like_celsius}")
-    print(f"Wind Speed : {wind_speed}")
-    print(f"{description}")
-    print(f"Humidity : {humidity}")
-    print(f"Sunrise : {sunrise_time}")
-    print(f"Sunset : {sunset_time}")
-    speak(f"Temperature is {tempInt} degree Celsius")
-    speak(f"Feels like {feelsInt} degree Celsius")
-    speak(f"With {humidity}percent humidity")
-    speak(f"And a windspeed of {wind_speed} kilometers per hour")
-    speak("Rest data is presnted on your screen sir. Thank you Sir.")
+    try:
+        geolocator = Nominatim(user_agent="geoapiExercises",timeout=10)
+        getLocation = geolocator.geocode(latitude+","+longitude)
+        print('Connecting to Server...')
+        print('\n')
+        print(f"Location:{getLocation}")
+        print(f"Latitude: {latitude}       Longitude: {longitude}")
+        print(f"Temperature in Celsius: {temp_celsius}")
+        print(f"Feels Like : {feels_like_celsius}")
+        print(f"Wind Speed : {wind_speed}")
+        print(f"{description}")
+        print(f"Humidity : {humidity}")
+        print(f"Sunrise : {sunrise_time}")
+        print(f"Sunset : {sunset_time}")
+        speak(f"Temperature is {tempInt} degree Celsius")
+        speak(f"Feels like {feelsInt} degree Celsius")
+        speak(f"With {humidity}percent humidity")
+        speak(f"And a windspeed of {wind_speed} kilometers per hour")
+        speak("Rest data is presnted on your screen sir. Thank you Sir.")
+    except Exception as e:
+        speak("Couldn't reach the servers. Please try again later")
 
 if __name__ == "__main__":
     flag = 1
@@ -205,7 +205,8 @@ if __name__ == "__main__":
 
                 elif 'weather' in query :
                     speak("Showing you live weather updates Sir")
-                    latitude,longitude = location()
+                    latitude = lat
+                    longitude = lon
                     weather(latitude,longitude)
                 
                 elif 'open code' in query :
@@ -213,6 +214,20 @@ if __name__ == "__main__":
                     codePath = "C:\\Users\\sapta\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
                     os.startfile(codePath)
                     
+                elif 'where am i' in query :
+                    speak("Tracking your present location Sir")
+                    print("Connecting to server...")
+                    time.sleep(1)
+                    try:
+                        geolocator = Nominatim(user_agent="geoapiExercises")
+                        latitude = lat 
+                        longitude = lon
+                        getLocation = geolocator.geocode(latitude+","+longitude)
+                        speak("Fetched your present location sir")
+                        speak(f"Sir your present Location is{getLocation}")
+                    except Exception as e:
+                        speak("Sorry sir could not connect to the servers. PLease try later.")
+
                 elif 'shutdown' in query:
                     speak("Shutting Down Service. Remember me when required. Adios")
                     exit(0)
