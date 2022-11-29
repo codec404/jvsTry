@@ -23,13 +23,15 @@ def speak(audio):
 
 def wishMe():
     hour = int(datetime.datetime.now().hour)
-    if hour>=0 and hour<12 :
+    if hour>=0 and hour<5:
+        speak("Hello Sir!")
+    elif hour>=5 and hour<12 :
         speak('Good Morning Sir!')
     elif hour>=12 and hour<18:
         speak("Good Afternoon Sir!")
     else :
         speak("Good Evening Sir!")
-    speak("I am Jarvis. Your personal Assistant. Please tell me how may I help you?")
+    speak("How may I help you?")
 
 def takeCommand():
     '''
@@ -74,6 +76,7 @@ def weather(latitude , longitude):
     try:
         geolocator = Nominatim(user_agent="geoapiExercises",timeout=10)
         getLocation = geolocator.geocode(latitude+","+longitude)
+        speak('Connecting to server')
         print('Connecting to Server...')
         print('\n')
         print(f"Location:{getLocation}")
@@ -174,6 +177,18 @@ if __name__ == "__main__":
                     speak('Turning Off. Into sleep mode.')  
                     flag = 0
                     break
+                
+                elif 'who are you' in query:
+                    speak("I am programmed by you and you named me as Jarvis. And I am your personal assistant. I am an AI based bot to help you in several ways. Always at your service sir.")
+                
+                elif 'do you have a girlfriend' in query:
+                    speak("I am a mindreader so girls are afraid to come in relationship with me. So I am Sada Single Saakht Launda")
+                
+                elif 'who is my mother' in query:
+                    speak("Mother is the living goddess on earth and your mother is my mistress as well. She is better known as Rupali Ghosh")
+
+                elif 'can you use slang' in query:
+                    speak("I am programmed in a way that I cannot use them. If I were human! I would have used them generously")
 
                 elif 'open whatsapp' in query:
                     speak("Opening Whatsapp Sir")
@@ -216,10 +231,11 @@ if __name__ == "__main__":
                     
                 elif 'where am i' in query :
                     speak("Tracking your present location Sir")
+                    speak("Connecting to server")
                     print("Connecting to server...")
                     time.sleep(1)
                     try:
-                        geolocator = Nominatim(user_agent="geoapiExercises")
+                        geolocator = Nominatim(user_agent="geoapiExercises",timeout = 10)
                         latitude = lat 
                         longitude = lon
                         getLocation = geolocator.geocode(latitude+","+longitude)
@@ -228,9 +244,42 @@ if __name__ == "__main__":
                     except Exception as e:
                         speak("Sorry sir could not connect to the servers. PLease try later.")
 
+                elif 'search' in query:
+                    import wikipedia as googleScrap
+                    query = query.replace('google search','')
+                    query = query.replace('search','')
+                    query = query.replace('google','')
+                    speak('This is what I found on the web Sir')
+
+                    try:
+                        pywhatkit.search(query)
+                        result = googleScrap.summary(query,2)
+                        speak(result)
+                    except Exception as e:
+                        speak("Cannot find any available data on the web sir")
+
                 elif 'shutdown' in query:
                     speak("Shutting Down Service. Remember me when required. Adios")
                     exit(0)
+
+                else:
+
+                    try:
+                        # pywhatkit.search(query)
+                        if query=='none':
+                            pass
+                        else:
+                            speak(f"Sir do you want to me to search anything about{query}")
+                            decision = takeCommand().lower()
+                            if 'yes' in decision:
+                                speak(f"Searching about {query} sir. PLease wait")
+                                result = wikipedia.summary(query,2)
+                                speak(result)
+                            else :
+                                speak('Ok sir tell me when you want me to do so.')
+                    except Exception as e:
+                        speak("I am not getting anything of that sort on the web")
+                
         else:
             continue
         

@@ -1,2 +1,5 @@
 env/
 __pycache__
+chromedriver_win32.zip
+chromedriver.exe
+test.py
