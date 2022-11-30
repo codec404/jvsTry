@@ -10,6 +10,11 @@ from geopy.geocoders import Nominatim
 import pywhatkit
 import time
 from location import lat,lon
+from AppOpener import run
+from pyautogui import click
+from keyboard import write , press
+import time
+from GtPassword import npassword
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -46,11 +51,82 @@ def takeCommand():
     try:
         print("Recognizing...")
         query = r.recognize_google(audio, language='en-in')
-        print(f"User said: {query}\n")
+        print(f"You said: {query}")
     except Exception as e:
-        print("Say that again please...")
+        print("Say that again please...\n")
         return "None"
     return query
+
+def func_Name():
+    name = takeCommand().lower()
+    return name
+
+def passwordCheck(password):
+    getPass = npassword
+    if password == getPass :
+        return True
+    else:
+        return False
+
+def sendWpMsg(name,message):
+    run('whatsapp')
+
+    time.sleep(5)
+    click(x=1042, y=768)
+    time.sleep(1)
+    write(name)
+    time.sleep(0.75)
+    click(x=328, y=279)
+    time.sleep(0.75)
+    click(x=991, y=970)
+    write(message)
+    press('enter')
+
+def searchAndNarrate():
+    import wikipedia as googleScrap
+    query = query.replace('google search','')
+    query = query.replace('search','')
+    query = query.replace('google','')
+    speak('This is what I found on the web Sir')
+
+    try:
+        pywhatkit.search(query)
+        result = googleScrap.summary(query,2)
+        speak(result)
+    except Exception as e:
+        speak("Cannot find any available data on the web sir")
+
+def GetLocation():
+    geolocator = Nominatim(user_agent="geoapiExercises",timeout = 10)
+    latitude = lat 
+    longitude = lon
+    getLocation = geolocator.geocode(latitude+","+longitude)
+    return getLocation
+
+def Confirmation():
+    giveConfirmation = takeCommand().lower()
+    return giveConfirmation
+
+def getMessage():
+    message = takeCommand().lower()
+    return message
+
+def speedTest():
+    import speedtest
+    speak("Ok sir checking your internet speed")
+    print('Checking Speed...')
+    speed = speedtest.Speedtest()
+    downspeed = speed.download()
+    correct_down_speed = int(downspeed/800000)
+    upspeed = speed.upload()
+    correct_up_speed = int(upspeed/800000)
+
+    if 'uploading' in query:
+        speak(f"The uploading speed is {correct_up_speed} megabits per second")
+    elif 'downloading' in query:
+        speak(f"The downloading speed is {correct_down_speed} megabits per second")
+    else :
+        speak(f"The uploading speed is {correct_up_speed} megabits per second and The downloading speed is {correct_down_speed} megabits per second")
 
 def kelvinToCelsiusFahrenheit(kelvin):
     celsius = kelvin -273.15
@@ -192,7 +268,7 @@ if __name__ == "__main__":
 
                 elif 'open whatsapp' in query:
                     speak("Opening Whatsapp Sir")
-                    webbrowser.open("web.whatsapp.com")
+                    run('whatsapp')
                 
                 elif 'open meeting' in query:
                     speak("Opening Google Meet")
@@ -228,35 +304,133 @@ if __name__ == "__main__":
                     speak("Opening VS Code by default")
                     codePath = "C:\\Users\\sapta\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
                     os.startfile(codePath)
-                    
+
+                elif 'send' in query:
+                    query = query.replace('send','')
+                    if 'ok' in query:
+                        query = query.replace('ok','')
+                    elif 'jarvis' in query:
+                        query = query.replace('jarvis','')
+                    elif 'ok jarvis' in query:
+                        query = query.replace('ok jarvis','')
+                    strTemp = 'to'
+                    res = query.split(strTemp,1)
+                    name = res[1]
+                    store = 5
+                    speak('For using this feature you need to verify yourself')
+                    speak('Please tell your password')
+                    while(store!=0):
+                        password = takeCommand().lower()
+                        flag = passwordCheck(password)
+                        if flag:
+                            speak(f"Ok sir preparing to send message to {name}")
+                            speak('What should I send sir?')
+                            message = getMessage()
+                            message = message[0].upper()+ message[1:]
+                            speak(f'Sir you will be sending {message} to {name} via whatsapp')
+                            while(True):
+                                speak(f'Are you sure to send this message?')
+                                confirm = Confirmation()
+                                if 'yes' in confirm:
+                                    speak(f'Ok sir sending your message to {name}')
+                                    sendWpMsg(name , message)
+                                    break
+                                elif 'cancel' in confirm:
+                                    speak('Aborting the program. Exited with Code 1')
+                                    break
+                                elif 'no' in confirm:
+                                    speak('Do you want to change the message or name of the person you want to sendthe message?')
+                                    dec = takeCommand().lower()
+                                    if 'name' in dec :
+                                        speak('Okay sir please tell the name to send the message')
+                                        name = func_Name()
+                                        speak('Okay got it!')
+                                        speak('Do you want to keep the message same or change it?')
+                                        decM = Confirmation()
+                                        if 'yes' in decM:
+                                            speak(f'Okay sir please tell the new message to send to {name}')
+                                            message = getMessage()
+                                            message = message[0].upper()+ message[1:]
+                                            speak(f'So you will be sending {message} to {name}')
+                                            continue
+                                        else:
+                                            speak(f'Sending {message} to {name}')
+                                            continue
+                                    elif 'message' in dec:
+                                        speak('Okay sir please tell the new message')
+                                        message = getMessage()
+                                        message = message[0].upper()+ message[1:]
+                                        speak('Okay got it!')
+                                        speak(f'Do you want to send this to {name} or change it?')
+                                        decM = takeCommand().lower()
+                                        if 'change' in decM:
+                                            speak(f'Okay sir please tell the name of the person to send this message')
+                                            name = func_Name()
+                                            speak(f'So you will be sending {message} to {name}')
+                                            continue
+                                        else:
+                                            speak(f'Sending {message} to {name}')
+                                            continue
+                                    else :
+                                        speak("Sorry sir couldn't get you please try to send the message later. Always at your service sir")
+                                        break
+                                else:
+                                    speak('Could not get you sir?')
+                                    speak('Do you want me to send any message to anyone?')
+                                    decision = Confirmation()
+                                    if 'yes' in decision:
+                                        speak('Please tell me the name of the person to send this message')
+                                        name = func_Name()
+                                        speak(f'Okay sir. Preparing to send message to {name}')
+                                        speak("And what should I send?")
+                                        message = getMessage()
+                                        message = message[0].upper()+ message[1:]
+                                        speak(f'Okay sir sending {message} to {name}')
+                                        continue
+                                    else :
+                                        speak('Okay sir message sending task aborted')
+                                        break
+                            break       
+                        else :
+                            store -=1
+                            if store ==0:
+                                speak('Sorry sir cannot perform your task. Please come later.')
+                                break
+                            else:
+                                speak('Wrong Password. Please pronounce the correct password.')
+                                continue
+
                 elif 'where am i' in query :
                     speak("Tracking your present location Sir")
                     speak("Connecting to server")
                     print("Connecting to server...")
                     time.sleep(1)
                     try:
-                        geolocator = Nominatim(user_agent="geoapiExercises",timeout = 10)
-                        latitude = lat 
-                        longitude = lon
-                        getLocation = geolocator.geocode(latitude+","+longitude)
+                        getLocation = GetLocation()
                         speak("Fetched your present location sir")
                         speak(f"Sir your present Location is{getLocation}")
                     except Exception as e:
                         speak("Sorry sir could not connect to the servers. PLease try later.")
 
                 elif 'search' in query:
-                    import wikipedia as googleScrap
-                    query = query.replace('google search','')
-                    query = query.replace('search','')
-                    query = query.replace('google','')
-                    speak('This is what I found on the web Sir')
+                    searchAndNarrate()
 
+                elif 'open' in query:
+                    import pyautogui
+                    query = query.replace('open','')
+                    if 'jarvis' in query:
+                        query = query.repalce('jarvis','')
+                    speak(f'Ok sir opening {query}')
                     try:
-                        pywhatkit.search(query)
-                        result = googleScrap.summary(query,2)
-                        speak(result)
+                        pyautogui.press('super')
+                        pyautogui.typewrite(query)
+                        pyautogui.sleep(2)
+                        pyautogui.press('enter')
                     except Exception as e:
-                        speak("Cannot find any available data on the web sir")
+                        speak('Cannot find any such thing to open')
+
+                elif 'speed' in query:
+                    speedTest()
 
                 elif 'shutdown' in query:
                     speak("Shutting Down Service. Remember me when required. Adios")
