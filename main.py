@@ -15,6 +15,11 @@ from pyautogui import click
 from keyboard import write , press
 import time
 from GtPassword import npassword
+from ctypes import cast,POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from store import storeData
+from googletrans import Translator
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -36,7 +41,32 @@ def wishMe():
         speak("Good Afternoon Sir!")
     else :
         speak("Good Evening Sir!")
+        
     speak("How may I help you?")
+
+def takeHindiCommand():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source)
+
+    try:
+        print("Recognizing...")
+        query = r.recognize_google(audio, language='hi')
+        print(f"You said: {query}")
+    except Exception as e:
+        print("Say that again please...\n")
+        return "None"
+    return query
+
+def Translate():
+    speak("Tell me what to translate, Sir")
+    getLine = takeHindiCommand()
+    trans = Translator()
+    res = trans.translate(getLine,dest='en')
+    getText = res.text
+    speak(getText)
 
 def takeCommand():
     '''
@@ -82,7 +112,22 @@ def sendWpMsg(name,message):
     write(message)
     press('enter')
 
-def searchAndNarrate():
+def setAlarm():
+    getAlarm = takeCommand().lower()
+    getAlarm = getAlarm.replace('set alarm to','')
+    # if 'on' in query:
+    #     query = query.replace('on','')
+    # elif 'to' in query:
+    #     query = query.replace('to','')
+    # elif 'at' in query:
+    #     query = query.replace('at','')
+    getAlarm = getAlarm.replace('.','')
+    getAlarm = getAlarm.upper()
+    speak(f'Ok sir. Setting alarm on {getAlarm}')
+    import set_Alarm_On_Dev
+    set_Alarm_On_Dev.alarmBuzz(getAlarm)
+
+def searchAndNarrate(query):
     import wikipedia as googleScrap
     query = query.replace('google search','')
     query = query.replace('search','')
@@ -122,10 +167,14 @@ def speedTest():
     correct_up_speed = int(upspeed/800000)
 
     if 'uploading' in query:
+        print(f"The uploading speed is {correct_up_speed} Mb/s")
         speak(f"The uploading speed is {correct_up_speed} megabits per second")
     elif 'downloading' in query:
+        print(f"The downloading speed is {correct_up_speed} Mb/s")
         speak(f"The downloading speed is {correct_down_speed} megabits per second")
     else :
+        print(f"The uploading speed is {correct_up_speed} Mb/s.")
+        print(f"The downloading speed is {correct_down_speed} Mb/s.")
         speak(f"The uploading speed is {correct_up_speed} megabits per second and The downloading speed is {correct_down_speed} megabits per second")
 
 def kelvinToCelsiusFahrenheit(kelvin):
@@ -175,6 +224,7 @@ def weather(latitude , longitude):
 if __name__ == "__main__":
     flag = 1
     joke = 1
+    mute = 0
     while True:
         get = sr.Recognizer()
         instruct = ""
@@ -214,7 +264,7 @@ if __name__ == "__main__":
                     webbrowser.open("google.com")
                 
                 elif 'the time' in query:
-                    strTime = datetime.datetime.now().strftime("%H:%M:%S")
+                    strTime = datetime.datetime.now().strftime("%I:%M %p")
                     print(f"Sir, the time is {strTime}")    
                     speak(f"Sir, the time is {strTime}")   
 
@@ -232,6 +282,51 @@ if __name__ == "__main__":
                     speak("Opening Audacity")
                     os.startfile(audPath)
                 
+                elif 'volume up' in query or 'increase volume' in query:
+                    speak('Ok sir increasing the volume. Please tell me when to stop')
+                    import pyautogui
+                    dev = AudioUtilities.GetSpeakers()
+                    getInterface = dev.Activate(IAudioEndpointVolume._iid_,CLSCTX_ALL,None)
+                    volume = cast(getInterface,POINTER(IAudioEndpointVolume))
+                    while(True):
+                        currentVol = str(volume.GetMasterVolumeLevel())
+                        if(currentVol == '0.0'):
+                            speak('Maximum volume reached, Sir.')
+                            break
+                        pyautogui.press('volumeup')
+                        entry = takeCommand().lower()
+                        if 'stop' in entry:
+                            speak('Ok sir stopping')
+                            break
+                              
+                elif 'volume down' in query or 'reduce volume' in query:
+                    speak('Ok sir reducing the volume. Please tell me when to stop')
+                    import pyautogui
+                    dev = AudioUtilities.GetSpeakers()
+                    getInterface = dev.Activate(IAudioEndpointVolume._iid_,CLSCTX_ALL,None)
+                    volume = cast(getInterface,POINTER(IAudioEndpointVolume))
+                    while(True):
+                        currentVol = str(volume.GetMasterVolumeLevel())
+                        if(currentVol == '-96.0'):
+                            print('Volume reached its minimum, Sir.')
+                            break
+                        pyautogui.press('volumedown')
+                        entry = takeCommand().lower()
+                        if 'stop' in entry:
+                            speak('Ok sir stopping')
+                            break
+                
+                elif 'mute' in query or 'turn on sound' in query:
+                    import pyautogui
+                    if 'mute' in query:
+                        speak('Muting your device sir')
+                        pyautogui.press('volumemute')
+                        print('Device Muted')
+                    elif 'turn on sound' in query:
+                        print('Unmuting Device')
+                        pyautogui.press('volumemute')
+                        speak('Device unmuted')
+                 
                 elif 'open word' in query:
                     wPath = "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE"
                     speak("Opening MS Word")
@@ -248,6 +343,10 @@ if __name__ == "__main__":
                     clip = query.replace('play','')
                     pywhatkit.playonyt(clip)  
                 
+                elif 'set alarm' in query :
+                    speak('Sir Please tell me the time to set the alarm. For example, set alarm to 6:00 AM')
+                    setAlarm()
+
                 elif 'bye' in query:
                     speak("Goodbye Sir. Have a nice day. Always at your service sir.")
                     speak('Turning Off. Into sleep mode.')  
@@ -293,6 +392,10 @@ if __name__ == "__main__":
                 
                 elif 'what is my name' in query:
                     speak("You are very famous amongst people as Jojo. But to me you are my master sir.")
+
+                elif 'translate' in query:
+                    speak('Okay sir translating your word.')
+                    Translate()
 
                 elif 'weather' in query :
                     speak("Showing you live weather updates Sir")
@@ -413,7 +516,7 @@ if __name__ == "__main__":
                         speak("Sorry sir could not connect to the servers. PLease try later.")
 
                 elif 'search' in query:
-                    searchAndNarrate()
+                    searchAndNarrate(query)
 
                 elif 'open' in query:
                     import pyautogui
@@ -436,6 +539,28 @@ if __name__ == "__main__":
                     speak("Shutting Down Service. Remember me when required. Adios")
                     exit(0)
 
+                elif 'about device' in query:
+                    speak('Okay Sir, fetching device information.')
+                    print('Fetching Data...')
+                    print('Product name'+' '+storeData['Product name'])
+                    print('Product number'+' '+storeData['Product number'])
+                    print('Serial number'+' '+storeData['Serial number'])
+                    print('Software build ID'+' '+storeData['Software build ID'])
+                    print('Motherboard ID'+' '+storeData['Motherboard ID'])
+                    print('BIOS'+' '+storeData['BIOS'])
+                    print('Keyboard revision'+' '+storeData['Keyboard revision'])
+                    print('Total memory'+' '+storeData['Total memory'])
+                    print('Processor name'+' '+storeData['Processor name'])
+                    speak('Product name'+' '+storeData['Product name'])
+                    speak('Product number'+' '+storeData['Product number'])
+                    speak('Serial number'+' '+storeData['Serial number'])
+                    speak('Software build ID'+' '+storeData['Software build ID'])
+                    speak('Motherboard ID'+' '+storeData['Motherboard ID'])
+                    speak('BIOS'+' '+storeData['BIOS'])
+                    speak('Keyboard revision'+' '+storeData['Keyboard revision'])
+                    speak('Total memory'+' '+storeData['Total memory'])
+                    speak('Processor name'+' '+storeData['Processor name'])
+                    
                 else:
 
                     try:
