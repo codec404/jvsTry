@@ -21,15 +21,14 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from store import storeData
 from googletrans import Translator
 
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-# print(voices[0].id)
-engine.setProperty('voice', voices[0].id)
-
+engineEng = pyttsx3.init('sapi5')
+voicesEng = engineEng.getProperty('voices')
+engineEng.setProperty('voice', voicesEng[0].id)
+engineEng.setProperty('rate',170)
 
 def speak(audio):
-    engine.say(audio)
-    engine.runAndWait()
+    engineEng.say(audio)
+    engineEng.runAndWait()
 
 def wishMe():
     hour = int(datetime.datetime.now().hour)
@@ -60,13 +59,46 @@ def takeHindiCommand():
         return "None"
     return query
 
-def Translate():
+def TranslateEng():
     speak("Tell me what to translate, Sir")
     getLine = takeHindiCommand()
     trans = Translator()
     res = trans.translate(getLine,dest='en')
     getText = res.text
     speak(getText)
+
+def TranslateHindi():
+    speak("Tell me what to translate, Sir")
+    getLine = takeCommand()
+    engineHin = pyttsx3.init('sapi5')
+    voicesHin = engineHin.getProperty('voices')
+    engineHin.setProperty('voice', voicesHin[2].id)
+    def speakHindi(audio):
+        engineHin.say(audio)
+        engineHin.runAndWait()
+    trans = Translator()
+    res = trans.translate(getLine,dest='hi')
+    getText = res.text
+    speakHindi(getText)
+    engineEng.setProperty('voice', voicesEng[0].id)
+    engineEng.setProperty('rate',170)
+
+def TranslateSpanish():
+    speak("Tell me what to translate, Sir")
+    getLine = takeCommand()
+    engineSp = pyttsx3.init('sapi5')
+    voicesSp = engineSp.getProperty('voices')
+    engineSp.setProperty('voice', voicesSp[1].id)
+    engineSp.setProperty('rate',170)
+    def speakSpanish(audio):
+        engineSp.say(audio)
+        engineSp.runAndWait()
+    trans = Translator()
+    res = trans.translate(getLine,dest='es')
+    getText = res.text
+    speakSpanish(getText)
+    engineEng.setProperty('voice', voicesEng[0].id)
+    engineEng.setProperty('rate',170)
 
 def takeCommand():
     '''
@@ -394,8 +426,16 @@ if __name__ == "__main__":
                     speak("You are very famous amongst people as Jojo. But to me you are my master sir.")
 
                 elif 'translate' in query:
-                    speak('Okay sir translating your word.')
-                    Translate()
+                    query = query.replace('translate into','')
+                    if 'english' in query:
+                        speak('Okay sir translating your word into English.')
+                        TranslateEng()
+                    elif 'hindi' in query:
+                        speak('Okay sir translating your word into Hindi.')
+                        TranslateHindi()
+                    elif 'spanish' in query:
+                        speak('Okay sir translating your word into Spanish.')
+                        TranslateSpanish()
 
                 elif 'weather' in query :
                     speak("Showing you live weather updates Sir")
@@ -535,8 +575,10 @@ if __name__ == "__main__":
                 elif 'speed' in query:
                     speedTest()
 
-                elif 'shutdown' in query:
+                elif 'shutdown' in query or 'shut down' in query:
                     speak("Shutting Down Service. Remember me when required. Adios")
+                    strTime = datetime.datetime.now().strftime("%I:%M %p")
+                    speak(f'Exiting with code 0 at{strTime}')
                     exit(0)
 
                 elif 'about device' in query:
