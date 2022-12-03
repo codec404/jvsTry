@@ -578,7 +578,7 @@ if __name__ == "__main__":
                 elif 'shutdown' in query or 'shut down' in query:
                     speak("Shutting Down Service. Remember me when required. Adios")
                     strTime = datetime.datetime.now().strftime("%I:%M %p")
-                    speak(f'Exiting with code 0 at{strTime}')
+                    speak(f'Exiting with code 0 at {strTime}')
                     exit(0)
 
                 elif 'about device' in query:
