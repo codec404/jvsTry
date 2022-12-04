@@ -8,3 +8,5 @@ automate.py
 GtPassword.py
 store.py
 Vosk/
+mailPass.py
+receivers.py

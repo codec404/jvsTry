@@ -20,6 +20,7 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from store import storeData
 from googletrans import Translator
+import smtplib
 
 engineEng = pyttsx3.init('sapi5')
 voicesEng = engineEng.getProperty('voices')
@@ -253,6 +254,17 @@ def weather(latitude , longitude):
     except Exception as e:
         speak("Couldn't reach the servers. Please try again later")
 
+def sendEmail(to,content):
+    from mailPass import mailPassword
+    from receivers import receivers
+    getReceiver = receivers[to]
+    server = smtplib.SMTP('smtp.gmail.com',587)
+    server.ehlo()
+    server.starttls()
+    server.login('jarvistestai74@gmail.com',mailPassword)
+    server.sendmail('jarvistestai74@gmail.com',getReceiver,content)
+    server.close()
+
 if __name__ == "__main__":
     flag = 1
     joke = 1
@@ -268,7 +280,7 @@ if __name__ == "__main__":
             # print(f"User said : {instruct}\n")
         except Exception as e:
             pass
-        if 'hello jarvis' in instruct.lower() :
+        if 'hello jarvis' in instruct.lower() or 'wake up' in instruct.lower() or 'switch on service' in instruct.lower():
             if flag==1 :
                 wishMe()
             else :
@@ -378,6 +390,39 @@ if __name__ == "__main__":
                 elif 'set alarm' in query :
                     speak('Sir Please tell me the time to set the alarm. For example, set alarm to 6:00 AM')
                     setAlarm()
+
+                elif 'send email' in query:
+                    query = query.replace('send email to','')
+                    toSend = query
+                    speak('In order to use this feature you need to prove your identity.')
+                    speak('Please tell me the secret password')
+                    store = 5
+                    while(store!=0):
+                        password = takeCommand().lower()
+                        flag = passwordCheck(password)
+                        if flag:
+                                try:
+                                    speak('Ok sir preparing to send the email')
+                                    speak('What should I send sir')
+                                    content = takeCommand().lower()
+                                    content = content[0]+content[1:]
+                                    print('Sending the email')
+                                    speak('Sending the email')
+                                    sendEmail(toSend,content)
+                                    print('Email Sent')
+                                    speak('Email sent')
+                                    break
+                                except Exception as e:
+                                    speak('Cannot send the email. Please check your credentials properly')
+                                    break
+                        else :
+                            store -=1
+                            if store ==0:
+                                speak('Sorry sir cannot perform your task. Please come later.')
+                                break
+                            else:
+                                speak('Wrong Password. Please pronounce the correct password.')
+                                continue
 
                 elif 'bye' in query:
                     speak("Goodbye Sir. Have a nice day. Always at your service sir.")
