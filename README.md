@@ -25,6 +25,12 @@ To deploy this project run
 ```
 The program starts when you say:
 " Hello Jarvis "
+
+You can also run the program in background using the provided .exe file.
+You just need to go to build folder after cloning.
+Then visit exe.win-amd-64-3.10
+Next open the main.exe file
+And just say "Hello Jarvis" or "Wake Up" or "switch on service"...
 ## Requirements
 
 ### Python packages
