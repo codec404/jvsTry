@@ -22,6 +22,7 @@ from store import storeData
 from googletrans import Translator
 import smtplib
 from playsound import playsound
+from sketchpy import library as lib
 
 engineEng = pyttsx3.init('sapi5')
 voicesEng = engineEng.getProperty('voices')
@@ -313,6 +314,46 @@ if __name__ == "__main__":
                     strTime = datetime.datetime.now().strftime("%I:%M %p")
                     print(f"Sir, the time is {strTime}")    
                     speak(f"Sir, the time is {strTime}")   
+
+                elif 'draw' in query:
+                    query = query.replace('draw','')
+                    presentDate =str(datetime.datetime.now())
+                    presentDate = presentDate[:10]
+                    file = open("currentDate.txt","r+")
+                    getDate = str(file.read())
+                    if getDate == presentDate:
+                        speak("Sir, you are allowed to use this feature only once in a day and your usage quota is over for today. Please try tomorrow.")
+                    else:
+                        if 'r d j' in query or 'robert downey junior' in query:
+                            speak('drawing r d j')
+                            myObj = lib.rdj()
+                            myObj.draw()
+                        elif 'a p j abdul kalam' in query or 'a p j' in query:
+                            speak('drawing a p j abdul kalam')
+                            myObj = lib.apj()
+                            myObj.draw()
+                        elif 'india' in query or 'flag' in query:
+                            speak('drawing flag')
+                            myObj = lib.flag()
+                            myObj.draw()
+                        elif 'iron man' in query or 'ascii' in query:
+                            speak('drawing ironman')
+                            myObj = lib.ironman_ascii()
+                            myObj.draw()
+                        elif 'tom holland' in query or 'spiderman' in query:
+                            speak('drawing tom holland')
+                            myObj = lib.tom_holland()
+                            myObj.draw()
+                        elif 'b t s' in query:
+                            speak('drawing  B T S')
+                            myObj = lib.bts()
+                            myObj.draw()
+                        else:
+                            speak('Cannot draw the thing you said, sorry sir.')
+                        file.seek(0)
+                        file.truncate(0)
+                        file.write(presentDate)
+                        file.close()
 
                 elif 'thank you' in query:
                     speak("Welcome sir. It's my pleasure to help you.")
