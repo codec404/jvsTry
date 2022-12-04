@@ -255,7 +255,7 @@ def weather(latitude , longitude):
         speak("Couldn't reach the servers. Please try again later")
 
 def sendEmail(to,content):
-    from mailPass import mailPassword
+    from getMailPassword import mailPassword
     from receivers import receivers
     getReceiver = receivers[to]
     server = smtplib.SMTP('smtp.gmail.com',587)
