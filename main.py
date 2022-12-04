@@ -21,6 +21,7 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from store import storeData
 from googletrans import Translator
 import smtplib
+from playsound import playsound
 
 engineEng = pyttsx3.init('sapi5')
 voicesEng = engineEng.getProperty('voices')
@@ -282,6 +283,7 @@ if __name__ == "__main__":
             pass
         if 'hello jarvis' in instruct.lower() or 'wake up' in instruct.lower() or 'switch on service' in instruct.lower():
             if flag==1 :
+                playsound("D:\\jarvis\\STARTUP_SOUND.mp3")
                 wishMe()
             else :
                 speak("Coming back from sleep mode. Hello Sir. How may I help you")
@@ -624,6 +626,7 @@ if __name__ == "__main__":
                     speak("Shutting Down Service. Remember me when required. Adios")
                     strTime = datetime.datetime.now().strftime("%I:%M %p")
                     speak(f'Exiting with code 0 at {strTime}')
+                    playsound("D:\\jarvis\\STARTUP_SOUND.mp3")
                     exit(0)
 
                 elif 'about device' in query:

@@ -24,13 +24,8 @@ To deploy this project run
   main.py
 ```
 The program starts when you say:
-" Hello Jarvis "
+" Hello Jarvis " or "Wake up Jarvis" or "Switch on service"
 
-You can also run the program in background using the provided .exe file.
-You just need to go to build folder after cloning.
-Then visit exe.win-amd-64-3.10
-Next open the main.exe file
-And just say "Hello Jarvis" or "Wake Up" or "switch on service"...
 ## Requirements
 
 ### Python packages
@@ -38,6 +33,10 @@ And just say "Hello Jarvis" or "Wake Up" or "switch on service"...
 * pyttsx3
 ```bash
   pip install pyttsx3
+```
+* playsound
+```bash
+  pip install playsound
 ```
 * pyaudio
 ```bash
