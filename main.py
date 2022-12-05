@@ -23,6 +23,7 @@ from googletrans import Translator
 import smtplib
 from playsound import playsound
 from sketchpy import library as lib
+import pyjokes as pj
 
 engineEng = pyttsx3.init('sapi5')
 voicesEng = engineEng.getProperty('voices')
@@ -498,14 +499,8 @@ if __name__ == "__main__":
                     webbrowser.open("spotify.com") 
 
                 elif 'tell me a joke' in query :
-                    speak("Ok Sir searching in my library.")
-                    if joke==1:
-                        speak("Why is cricket stadium so cool? Because every seat has a fan in it.")
-                    elif joke==2:
-                        speak("Why don't some couples go to the gym?  Becasuse some relationships don't work out.")
-                    else:
-                        speak("I am running out of jokes sir. Can you consult me later as I will return turning into a joker")
-                    joke +=1
+                    joke = pj.get_joke()
+                    speak(joke)
 
                 elif 'who am i' in query:
                     speak("You are my Master Sir. Everybody calls you Saptarshi.")
